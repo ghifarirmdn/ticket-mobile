@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ticket_mobile/core/constants/colors.dart';
 import 'package:ticket_mobile/core/widgets/loading_widget.dart';
 import 'package:ticket_mobile/core/widgets/ticket_item.dart';
+import 'package:ticket_mobile/providers/auth_provider.dart';
 import 'package:ticket_mobile/providers/ticket_provider.dart';
-import 'package:ticket_mobile/screens/login_screen.dart';
 import 'package:ticket_mobile/screens/ticket_form.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final ticketProvider = Provider.of<TicketProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
       backgroundColor: secondaryColor,
@@ -41,21 +41,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            onPressed: () async {
-              final pref = await SharedPreferences.getInstance();
-              pref.remove('token');
-              pref.remove('role');
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const LoginScreen(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.logout),
-          ),
+          Consumer<AuthProvider>(builder: (context, value, child) {
+            return value.isLoading
+                ? LoadingWidget(color: primaryColor)
+                : IconButton(
+                    onPressed: () {
+                      authProvider.logout(context: context);
+                    },
+                    icon: const Icon(Icons.logout),
+                  );
+          }),
         ],
         centerTitle: true,
       ),

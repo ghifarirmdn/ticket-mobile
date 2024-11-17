@@ -7,6 +7,7 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
+  Future<Response> logout();
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -28,6 +29,19 @@ class AuthRepositoryImpl implements AuthRepository {
       return response;
     } on DioException catch (e) {
       log('Error login: ${e.response?.data ?? e.message}');
+      return e.response!;
+    }
+  }
+
+  @override
+  Future<Response> logout() async {
+    final dio = await DioClient.getDioInstance();
+    try {
+      final response = await dio.post('/logout');
+      log('Successfully logout: ${response.data}');
+      return response;
+    } on DioException catch (e) {
+      log('Error logout: ${e.response?.data ?? e.message}');
       return e.response!;
     }
   }
